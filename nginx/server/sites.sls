@@ -3,6 +3,13 @@
 {%- set ssl_certificates = {} %}
 
 {%- for site_name, site in server.get('site', {}).iteritems() %}
+
+{%- set site_type = site.get('type', 'nginx_static') %}
+{%- set site_file_prefix = '' %}
+{%- if site.get('type') %}
+  {%- set site_file_prefix = site.type + '_' %}
+{%- endif %}
+
 {%- if site.get('enabled') %}
 
 {%- if site.get('ssl', {'enabled': False}).enabled %}
@@ -126,17 +133,11 @@ nginx_init_{{ site.host.name }}_tls:
 
 sites-available-{{ site_name }}:
   file.managed:
-  - name: {{ server.vhost_dir }}/{{ site.type }}_{{ site.name }}.conf
-  {%- if site.type == 'nginx_proxy' %}
-  - source: salt://nginx/files/proxy.conf
-  {%- elif site.type == 'nginx_redirect' %}
-  - source: salt://nginx/files/redirect.conf
-  {%- elif site.type == 'nginx_static' %}
-  - source: salt://nginx/files/static.conf
-  {%- elif site.type == 'nginx_stats' %}
-  - source: salt://nginx/files/stats.conf
+  - name: {{ server.vhost_dir }}/{{ site_file_prefix }}{{ site.name }}.conf
+  {%- if not site_type.startswith('nginx_') %}
+  - source: salt://{{ site_type }}/files/nginx.conf }
   {%- else %}
-  - source: salt://{{ site.type }}/files/nginx.conf
+  - source: salt://nginx/files/generic_server.conf
   {%- endif %}
   - template: jinja
   - require:
@@ -151,16 +152,16 @@ sites-available-{{ site_name }}:
 {%- if grains.os_family == 'Debian' %}
 sites-enabled-{{ site_name }}:
   file.symlink:
-  - name: /etc/nginx/sites-enabled/{{ site.type }}_{{ site.name }}.conf
-  - target: {{ server.vhost_dir }}/{{ site.type }}_{{ site.name }}.conf
+  - name: /etc/nginx/sites-enabled/{{ site_file_prefix }}{{ site.name }}.conf
+  - target: {{ server.vhost_dir }}/{{ site_file_prefix }}{{ site.name }}.conf
 {%- endif %}
 {%- else %}
 
-{{ server.vhost_dir }}/{{ site.type }}_{{ site.name }}.conf:
+{{ server.vhost_dir }}/{{ site_file_prefix }}{{ site.name }}.conf:
   file.absent
 
 {%- if grains.os_family == 'Debian' %}
-/etc/nginx/sites-enabled/{{ site.type }}_{{ site.name }}.conf:
+/etc/nginx/sites-enabled/{{ site_file_prefix }}{{ site.name }}.conf:
   file.absent
 {%- endif %}
 
