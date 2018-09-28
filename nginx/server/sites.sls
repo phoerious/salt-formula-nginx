@@ -21,7 +21,7 @@ nginx_generate_{{ site_name }}_dhparams:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {% endif %}
 
 {%- if site.ssl.get('ticket_key', {'enabled': False}).enabled %}
@@ -32,7 +32,7 @@ nginx_generate_{{ site_name }}_ticket_key:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {% endif %}
 
 {%- if site.ssl.get('password_file', {'enabled': False}).enabled and site.ssl.password_file.file is not defined and site.ssl.password_file.content is defined %}
@@ -42,7 +42,7 @@ nginx_generate_{{ site_name }}_ticket_key:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {% endif %}
 {% endif %}
 
@@ -71,7 +71,7 @@ nginx_generate_{{ site_name }}_ticket_key:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
     - cmd: nginx_init_{{ site.host.name }}_tls
 
 {{ site.host.name }}_private_key:
@@ -127,7 +127,7 @@ nginx_init_{{ site.host.name }}_tls:
   - name: "cat {{ cert_file }} {{ ca_file }} > {{ chain_file }}"
   - onlyif: {% if old_chain_file != new_chain_file %}/bin/true{% else %}/bin/false{% endif %}
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {%- endif %}
 
 
@@ -145,7 +145,7 @@ sites-available-{{ site_name }}:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
   - defaults:
     site_name: "{{ site_name }}"
 

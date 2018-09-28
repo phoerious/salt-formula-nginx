@@ -61,7 +61,7 @@ policy-rc.d_absent:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 
 {%- if not salt['file.directory_exists']('/etc/ssl/private') %}
 /etc/ssl/private:
@@ -87,7 +87,7 @@ policy-rc.d_absent:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {%- endif %}
 
 {%- if server.upstream is defined %}
@@ -98,14 +98,22 @@ policy-rc.d_absent:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {%- endif %}
+
 
 nginx_service:
   service.running:
   - name: {{ server.service }}
+  - reload: True
   - require:
     - pkg: nginx_packages
+  - watch:
+    - module: nginx_config_test
+
+nginx_config_test:
+  module.wait:
+    - name: nginx.configtest
 
 {%- set generate_dhparams = { 'enabled': False } %}
 {%- for site_name, site in server.get('site', {}).iteritems() %}
@@ -123,7 +131,7 @@ nginx_generate_dhparams:
   - require:
     - pkg: nginx_packages
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 {%- endif %}
 
 {%- if server.wait_for_service is defined %}
@@ -151,7 +159,7 @@ systemctl_reload:
   - onchanges:
     - file: /etc/systemd/system/nginx.service.d/override.conf
   - watch_in:
-    - service: nginx_service
+    - module: nginx_config_test
 
 {%- endif %}
 
