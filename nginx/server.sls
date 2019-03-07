@@ -101,6 +101,19 @@ policy-rc.d_absent:
     - module: nginx_config_test
 {%- endif %}
 
+{%- if server.certificates is defined %}
+{%- for cert in server.certificates %}
+/etc/nginx/certificates/{{ cert }}.pem:
+  file.managed:
+  - contents_pillar: "nginx:server:certificates:{{ cert }}"
+  - require:
+    - pkg: nginx_packages
+  - watch_in:
+    - module: nginx_config_test
+  - makedirs: True
+{%- endfor %}
+{%- endif %}
+
 
 nginx_service:
   service.running:
