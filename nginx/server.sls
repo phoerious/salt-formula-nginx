@@ -129,7 +129,7 @@ nginx_config_test:
     - name: nginx.configtest
 
 {%- set generate_dhparams = { 'enabled': False } %}
-{%- for site_name, site in server.get('site', {}).iteritems() %}
+{%- for site_name, site in server.get('site', {}).items() %}
 {%- if site.get('ssl', {}).get('enabled') and site.ssl.get('mode', 'secure') == 'secure' %}
   {%- do generate_dhparams.update({ 'enabled': True }) %}
   {%- break %}
