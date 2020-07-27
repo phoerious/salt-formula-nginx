@@ -2,7 +2,7 @@
 
 {%- set ssl_certificates = {} %}
 
-{%- for site_name, site in server.get('site', {}).iteritems() %}
+{%- for site_name, site in server.get('site', {}).items() %}
 
 {%- set site_type = site.get('type', 'nginx_static') %}
 {%- set site_file_prefix = '' %}
