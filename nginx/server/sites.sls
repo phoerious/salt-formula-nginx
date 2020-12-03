@@ -5,10 +5,6 @@
 {%- for site_name, site in server.get('site', {}).items() %}
 
 {%- set site_type = site.get('type', 'nginx_static') %}
-{%- set site_file_prefix = '' %}
-{%- if site.get('type') %}
-  {%- set site_file_prefix = site.type + '_' %}
-{%- endif %}
 
 {%- if site.get('enabled') %}
 
@@ -135,7 +131,7 @@ nginx_init_{{ site.host.name }}_tls:
 
 sites-available-{{ site_name }}:
   file.managed:
-  - name: {{ server.vhost_dir }}/{{ site_file_prefix }}{{ site.get('name', site_name) }}.conf
+  - name: {{ server.vhost_dir }}/{{ site.get('name', site_name) }}.conf
   {%- if not site_type.startswith('nginx_') %}
   - source: salt://{{ site_type }}/files/nginx.conf }
   {%- else %}
@@ -154,16 +150,16 @@ sites-available-{{ site_name }}:
 {%- if grains.os_family == 'Debian' %}
 sites-enabled-{{ site_name }}:
   file.symlink:
-  - name: /etc/nginx/sites-enabled/{{ site_file_prefix }}{{ site.get('name', site_name) }}.conf
-  - target: {{ server.vhost_dir }}/{{ site_file_prefix }}{{ site.get('name', site_name) }}.conf
+  - name: /etc/nginx/sites-enabled/{{ site.get('name', site_name) }}.conf
+  - target: {{ server.vhost_dir }}/{{ site.get('name', site_name) }}.conf
 {%- endif %}
 {%- else %}
 
-{{ server.vhost_dir }}/{{ site_file_prefix }}{{ site.get('name', site_name) }}.conf:
+{{ server.vhost_dir }}/{{ site.get('name', site_name) }}.conf:
   file.absent
 
 {%- if grains.os_family == 'Debian' %}
-/etc/nginx/sites-enabled/{{ site_file_prefix }}{{ site.get('name', site_name) }}.conf:
+/etc/nginx/sites-enabled/{{ site.get('name', site_name) }}.conf:
   file.absent
 {%- endif %}
 
