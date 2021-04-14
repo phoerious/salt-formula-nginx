@@ -178,4 +178,13 @@ systemctl_reload:
 
 {%- endif %}
 
+{%- if server.get('periodic_reload', False) %}
+# Periodic config reload (e.g. for refreshing updated certificates)
+nginx_periodic_reload:
+  cron.present:
+    - name: "nginx -s reload"
+    - user: root
+    - special: '@daily'
+{%- endif %}
+
 {%- endif %}
