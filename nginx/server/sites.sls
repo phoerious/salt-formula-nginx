@@ -117,7 +117,7 @@ nginx_generate_{{ site_name }}_ticket_key:
 {%- set old_chain_file = salt['cmd.shell']('cat {0}'.format(chain_file)) %}
 {%- set new_chain_file = salt['cmd.shell']('cat {0} {1}'.format(cert_file, ca_file)) %}
 
-{%- if site.ssl.get('engine', '') != 'letsencrypt' %}
+{%- if site.ssl.get('engine', '') not in ['letsencrypt', 'k8s-sync'] %}
 nginx_init_{{ site.host.name }}_tls:
   cmd.run:
   - name: "cat {{ cert_file }} {{ ca_file }} > {{ chain_file }}"
